@@ -12,11 +12,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set up JDK 17 (AGP 8.5.x için)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
@@ -24,10 +24,11 @@ jobs:
       - name: Accept licenses
         run: yes | sdkmanager --licenses
 
-      - name: Install SDK platforms
+      - name: Install SDK platforms & build-tools
         run: |
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
+      # Gradle wrapper yok; sistem gradle kullanıyoruz.
       - name: Download Gradle 8.7
         run: |
           wget https://services.gradle.org/distributions/gradle-8.7-bin.zip -O gradle.zip
@@ -36,9 +37,11 @@ jobs:
 
       - name: Build Debug APK (inside ShelfLife/)
         working-directory: ShelfLife
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}   # setup-java'nın kurduğu JDK
         run: |
           gradle -v
-          gradle :app:assembleDebug
+          gradle --no-daemon clean :app:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
