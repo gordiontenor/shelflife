@@ -12,14 +12,16 @@ import com.koral.expiry.data.FoodItem
 @Composable
 fun ListScreen(onAdd: () -> Unit, vm: MainViewModel = viewModel(factory = VmFactory.default())) {
     val items by vm.items.collectAsState()
+    val sortedItems = items.sortedWith(compareBy(nullsLast()) { it.expiryDate })
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) { Text("+") }
         }
     ) { pad ->
         LazyColumn(Modifier.padding(pad)) {
-            items(items.size) { ix ->
-                val it = items[ix]
+            items(sortedItems.size) { ix ->
+                val it = sortedItems[ix]
                 ListRow(it = it, onDelete = { vm.delete(it) })
                 Divider()
             }
